@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Map: ความเชื่อมโยงรายวิชาสู่ผลการเรียนรู้</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #F8F9FA;
+        }
+        #mind-map-container {
+            position: relative;
+        }
+        #connection-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .node {
+            position: relative;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Mind Map หลักสูตร</h1>
+            <p class="text-xl text-gray-600 mt-2">แผนผังแสดงความเชื่อมโยงจากรายวิชาสู่ผลการเรียนรู้ (PLO)</p>
+            <div class="mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md max-w-2xl mx-auto">
+                <p>💡 <span class="font-semibold">เคล็ดลับ:</span> ลองนำเมาส์ไปวางบนรายวิชาต่างๆ เพื่อดูเส้นเชื่อมโยงไปยัง PLO</p>
+            </div>
+        </header>
+
+        <div id="mind-map-container" class="min-w-[1200px] overflow-x-auto">
+            <canvas id="connection-canvas"></canvas>
+            <div class="flex justify-between items-start p-4 space-x-8">
+                
+                <!-- Courses Column -->
+                <div id="courses-column" class="flex flex-col space-y-12 w-8/12">
+                    <!-- Course groups will be generated here by JavaScript -->
+                </div>
+
+                <!-- PLOs Column -->
+                <div id="plos-column" class="flex flex-col justify-around space-y-8 w-3/12 pt-16">
+                    <!-- PLO nodes will be generated here by JavaScript -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Return to Home Button -->
+        <div class="text-center mt-12 mb-4">
+            <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50">
+                กลับไปหน้าแรก
+            </a>
+        </div>
+
+    </div>
+    
+    <footer class="text-center p-6 bg-gray-800 text-white">
+        <p>Mind Map generated using HTML, Tailwind CSS, and the Canvas API.</p>
+    </footer>
+
+    <script>
+        // Updated data based on the provided Word document.
+        const curriculumData = [
+            // ชั้นปีที่ 1
+            { id: 0, group: "ชั้นปีที่ 1", course: "ดนตรีพื้นฐาน", plos: [1, 7] },
+            { id: 1, group: "ชั้นปีที่ 1", course: "ประวัติดนตรีตะวันตก", plos: [1] },
+            { id: 2, group: "ชั้นปีที่ 1", course: "สุนทรียศาสตร์", plos: [1] },
+            { id: 3, group: "ชั้นปีที่ 1", course: "ทักษะดนตรีตะวันตก 1", plos: [1, 7] },
+            { id: 4, group: "ชั้นปีที่ 1", course: "ทักษะดนตรีตะวันตก 2", plos: [1, 7] },
+            { id: 5, group: "ชั้นปีที่ 1", course: "ทฤษฎีดนตรีตะวันตก", plos: [1] },
+            { id: 6, group: "ชั้นปีที่ 1", course: "การอ่านออกเสียงโน้ต", plos: [1] },
+            { id: 7, group: "ชั้นปีที่ 1", course: "การพัฒนาโสตประสาท", plos: [1] },
+            { id: 8, group: "ชั้นปีที่ 1", course: "การบริหารจัดการนวัตกรรมดนตรี", plos: [3, 7] },
+            { id: 9, group: "ชั้นปีที่ 1", course: "การฝึกปฏิบัติวิชาชีพระหว่างเรียน 1", plos: [6, 7] },
+
+            // ชั้นปีที่ 2
+            { id: 10, group: "ชั้นปีที่ 2", course: "หลักการประสานเสียง", plos: [1] },
+            { id: 11, group: "ชั้นปีที่ 2", course: "ทักษะดนตรีตะวันตก 3", plos: [1, 7] },
+            { id: 12, group: "ชั้นปีที่ 2", course: "ทักษะดนตรีตะวันตก 4", plos: [1, 7] },
+            { id: 13, group: "ชั้นปีที่ 2", course: "การเรียบเรียงเสียงประสาน", plos: [2] },
+            { id: 14, group: "ชั้นปีที่ 2", course: "คอมพิวเตอร์ดนตรี", plos: [2, 7] },
+            { id: 15, group: "ชั้นปีที่ 2", course: "การบริหารจัดการพื้นฐานสำหรับงานสตูดิโอ", plos: [3, 7] },
+            { id: 16, group: "ชั้นปีที่ 2", course: "สัมมนานดนตรี", plos: [5, 7] },
+            { id: 17, group: "ชั้นปีที่ 2", course: "การฝึกปฏิบัติวิชาชีพระหว่างเรียน 2", plos: [6, 7] },
+
+            // ชั้นปีที่ 3
+            { id: 18, group: "ชั้นปีที่ 3", course: "สังคีตลักษณ์และการวิเคราะห์", plos: [1] },
+            { id: 19, group: "ชั้นปีที่ 3", course: "ดนตรีนานาชาติ", plos: [1] },
+            { id: 20, group: "ชั้นปีที่ 3", course: "การซ่อมแซมและบำรุงรักษาเครื่องดนตรี", plos: [1, 7] },
+            { id: 21, group: "ชั้นปีที่ 3", course: "ทักษะดนตรีตะวันตก 5", plos: [1, 7] },
+            { id: 22, group: "ชั้นปีที่ 3", course: "ทักษะดnตรีตะวันตก 6", plos: [1, 7] },
+            { id: 23, group: "ชั้นปีที่ 3", course: "การสร้างสรรค์ดนตรี", plos: [2, 5, 7] },
+            { id: 24, group: "ชั้นปีที่ 3", course: "การประพันธ์เพลง 1", plos: [2, 5, 7] },
+            { id: 25, group: "ชั้นปีที่ 3", course: "การประพันธ์เพลง 2", plos: [2, 5, 7] },
+            { id: 26, group: "ชั้นปีที่ 3", course: "โครงร่างศิลปนิพนธ์", plos: [3, 7] },
+            { id: 27, group: "ชั้นปีที่ 3", course: "การฝึกปฏิบัติวิชาชีพระหว่างเรียน 3", plos: [6, 7] },
+
+            // ชั้นปีที่ 4
+            { id: 28, group: "ชั้นปีที่ 4", course: "ศิลปนิพนธ์", plos: [2, 3, 5, 7] },
+            { id: 29, group: "ชั้นปีที่ 4", course: "นวัตศิลป์เพื่อชุมชน", plos: [4, 5, 7] },
+            { id: 30, group: "ชั้นปีที่ 4", course: "วิธีสอนและเทคนิคการสอนดนตรีตะวันตก", plos: [4, 7] },
+            { id: 31, group: "ชั้นปีที่ 4", course: "การปฏิบัติการสอนในสถานศึกษา", plos: [4, 6, 7] },
+        ];
+
+        const ploInfo = {
+            1: { label: "PLO 1", color: "#FF8C42" },
+            2: { label: "PLO 2", color: "#2E93A3" },
+            3: { label: "PLO 3", color: "#4E598C" },
+            4: { label: "PLO 4", color: "#A4C5A1" },
+            5: { label: "PLO 5", color: "#F5E663" },
+            6: { label: "PLO 6", color: "#D96C75" },
+            7: { label: "PLO 7", color: "#8C7AA9" }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const coursesColumn = document.getElementById('courses-column');
+            const plosColumn = document.getElementById('plos-column');
+            const canvas = document.getElementById('connection-canvas');
+            const ctx = canvas.getContext('2d');
+            const mindMapContainer = document.getElementById('mind-map-container');
+
+            // Group courses by 'group' (which is now the academic year)
+            const groupedCourses = curriculumData.reduce((acc, item) => {
+                acc[item.group] = acc[item.group] || [];
+                acc[item.group].push(item);
+                return acc;
+            }, {});
+
+            // Create and append course groups and nodes
+            for (const groupName in groupedCourses) {
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'p-4 border-l-4 border-gray-300';
+                
+                const groupTitle = document.createElement('h2');
+                groupTitle.className = 'text-xl font-bold mb-4 text-gray-700';
+                groupTitle.textContent = groupName;
+                groupContainer.appendChild(groupTitle);
+                
+                const coursesList = document.createElement('div');
+                coursesList.className = 'grid grid-cols-2 gap-4';
+                
+                groupedCourses[groupName].forEach(course => {
+                    const courseNode = document.createElement('div');
+                    courseNode.id = `course-${course.id}`;
+                    courseNode.className = 'node bg-white shadow-md rounded-lg p-2 text-sm cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105';
+                    courseNode.textContent = course.course;
+                    coursesList.appendChild(courseNode);
+                });
+                
+                groupContainer.appendChild(coursesList);
+                coursesColumn.appendChild(groupContainer);
+            }
+
+            // Create and append PLO nodes
+            for (const ploId in ploInfo) {
+                const ploNode = document.createElement('div');
+                ploNode.id = `plo-${ploId}`;
+                ploNode.className = 'node shadow-lg rounded-lg p-3 w-full text-center text-white font-bold';
+                ploNode.style.backgroundColor = ploInfo[ploId].color;
+                ploNode.textContent = ploInfo[ploId].label;
+                plosColumn.appendChild(ploNode);
+            }
+            
+            let hoveredCourseId = null;
+
+            // Function to draw connections on the canvas
+            function drawConnections() {
+                const containerRect = mindMapContainer.getBoundingClientRect();
+                canvas.width = containerRect.width;
+                canvas.height = mindMapContainer.scrollHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                curriculumData.forEach(course => {
+                    const courseEl = document.getElementById(`course-${course.id}`);
+                    if (!courseEl) return;
+                    
+                    const startRect = courseEl.getBoundingClientRect();
+                    
+                    course.plos.forEach(ploId => {
+                        const ploEl = document.getElementById(`plo-${ploId}`);
+                        if (!ploEl) return;
+                        
+                        const endRect = ploEl.getBoundingClientRect();
+                        
+                        // Calculate coordinates relative to the mind map container
+                        const startX = startRect.right - containerRect.left;
+                        const startY = startRect.top + startRect.height / 2 - containerRect.top;
+                        const endX = endRect.left - containerRect.left;
+                        const endY = endRect.top + endRect.height / 2 - containerRect.top;
+                        
+                        // Draw Bezier curve
+                        ctx.beginPath();
+                        ctx.moveTo(startX, startY);
+                        ctx.bezierCurveTo(startX + 150, startY, endX - 150, endY, endX, endY);
+                        
+                        const isHovered = (hoveredCourseId !== null && course.id === hoveredCourseId);
+
+                        // Style the line
+                        ctx.strokeStyle = ploInfo[ploId].color;
+                        ctx.lineWidth = isHovered ? 4 : 1.5;
+                        ctx.globalAlpha = isHovered ? 1.0 : 0.4;
+                        
+                        ctx.stroke();
+                    });
+                });
+                ctx.globalAlpha = 1.0; // Reset alpha
+            }
+            
+            // Add mouse event listeners to each course node
+            curriculumData.forEach(course => {
+                const courseEl = document.getElementById(`course-${course.id}`);
+                courseEl.addEventListener('mouseenter', () => {
+                    hoveredCourseId = course.id;
+                    drawConnections();
+                });
+                courseEl.addEventListener('mouseleave', () => {
+                    hoveredCourseId = null;
+                    drawConnections();
+                });
+            });
+
+            // Redraw connections on window resize
+            const resizeObserver = new ResizeObserver(() => drawConnections());
+            resizeObserver.observe(mindMapContainer);
+            
+            // Initial draw
+            setTimeout(drawConnections, 150);
+        });
+
+    </script>
+</body>
+</html>
